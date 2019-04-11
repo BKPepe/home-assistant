@@ -140,7 +140,7 @@ def test_save_and_load():
     open(fname, "w+").close()
     util_yaml.save_yaml(fname, yaml.load(TEST_YAML_A))
     data = util_yaml.load_yaml(fname, True)
-    assert data == yaml.load(TEST_YAML_A)
+    assert data == yaml.safe_load(TEST_YAML_A)
 
 
 def test_overwrite_and_reload():
@@ -151,7 +151,7 @@ def test_overwrite_and_reload():
     util_yaml.save_yaml(fname, yaml.load(TEST_YAML_A))
     util_yaml.save_yaml(fname, yaml.load(TEST_YAML_B))
     data = util_yaml.load_yaml(fname, True)
-    assert data == yaml.load(TEST_YAML_B)
+    assert data == yaml.safe_load(TEST_YAML_B)
 
 
 def test_load_bad_data():
@@ -160,4 +160,4 @@ def test_load_bad_data():
     with open(fname, "w") as fh:
         fh.write(TEST_BAD_YAML)
     with pytest.raises(HomeAssistantError):
-        util_yaml.load_yaml(fname, True)
+        util_yaml.safe_load_yaml(fname, True)

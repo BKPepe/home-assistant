@@ -26,7 +26,7 @@ def test_simple_list():
     """Test simple list."""
     conf = "config:\n  - simple\n  - list"
     with io.StringIO(conf) as file:
-        doc = yaml_loader.yaml.safe_load(file)
+        doc = yaml_loader.yaml.load(file)
     assert doc['config'] == ["simple", "list"]
 
 
@@ -34,7 +34,7 @@ def test_simple_dict():
     """Test simple dict."""
     conf = "key: value"
     with io.StringIO(conf) as file:
-        doc = yaml_loader.yaml.safe_load(file)
+        doc = yaml_loader.yaml.load(file)
     assert doc['key'] == 'value'
 
 
@@ -59,7 +59,7 @@ def test_environment_variable():
     os.environ["PASSWORD"] = "secret_password"
     conf = "password: !env_var PASSWORD"
     with io.StringIO(conf) as file:
-        doc = yaml_loader.yaml.safe_load(file)
+        doc = yaml_loader.yaml.load(file)
     assert doc['password'] == "secret_password"
     del os.environ["PASSWORD"]
 
@@ -68,7 +68,7 @@ def test_environment_variable_default():
     """Test config file with default value for environment variable."""
     conf = "password: !env_var PASSWORD secret_password"
     with io.StringIO(conf) as file:
-        doc = yaml_loader.yaml.safe_load(file)
+        doc = yaml_loader.yaml.load(file)
     assert doc['password'] == "secret_password"
 
 
@@ -77,7 +77,7 @@ def test_invalid_environment_variable():
     conf = "password: !env_var PASSWORD"
     with pytest.raises(HomeAssistantError):
         with io.StringIO(conf) as file:
-            yaml_loader.yaml.safe_load(file)
+            yaml_loader.yaml.load(file)
 
 
 def test_include_yaml():
@@ -85,13 +85,13 @@ def test_include_yaml():
     with patch_yaml_files({'test.yaml': 'value'}):
         conf = 'key: !include test.yaml'
         with io.StringIO(conf) as file:
-            doc = yaml_loader.yaml.safe_load(file)
+            doc = yaml_loader.yaml.load(file)
             assert doc["key"] == "value"
 
     with patch_yaml_files({'test.yaml': None}):
         conf = 'key: !include test.yaml'
         with io.StringIO(conf) as file:
-            doc = yaml_loader.yaml.safe_load(file)
+            doc = yaml_loader.yaml.load(file)
             assert doc["key"] == {}
 
 
@@ -108,7 +108,7 @@ def test_include_dir_list(mock_walk):
     }):
         conf = "key: !include_dir_list /tmp"
         with io.StringIO(conf) as file:
-            doc = yaml_loader.yaml.safe_load(file)
+            doc = yaml_loader.yaml.load(file)
             assert doc["key"] == sorted(["one", "two"])
 
 
@@ -130,7 +130,7 @@ def test_include_dir_list_recursive(mock_walk):
         with io.StringIO(conf) as file:
             assert '.ignore' in mock_walk.return_value[0][1], \
                 "Expecting .ignore in here"
-            doc = yaml_loader.yaml.safe_load(file)
+            doc = yaml_loader.yaml.load(file)
             assert 'tmp2' in mock_walk.return_value[0][1]
             assert '.ignore' not in mock_walk.return_value[0][1]
             assert sorted(doc["key"]) == sorted(["zero", "one", "two"])
@@ -150,7 +150,7 @@ def test_include_dir_named(mock_walk):
         conf = "key: !include_dir_named /tmp"
         correct = {'first': 'one', 'second': 'two'}
         with io.StringIO(conf) as file:
-            doc = yaml_loader.yaml.safe_load(file)
+            doc = yaml_loader.yaml.load(file)
             assert doc["key"] == correct
 
 
@@ -173,7 +173,7 @@ def test_include_dir_named_recursive(mock_walk):
         with io.StringIO(conf) as file:
             assert '.ignore' in mock_walk.return_value[0][1], \
                 "Expecting .ignore in here"
-            doc = yaml_loader.yaml.safe_load(file)
+            doc = yaml_loader.yaml.load(file)
             assert 'tmp2' in mock_walk.return_value[0][1]
             assert '.ignore' not in mock_walk.return_value[0][1]
             assert doc["key"] == correct
@@ -190,7 +190,7 @@ def test_include_dir_merge_list(mock_walk):
     }):
         conf = "key: !include_dir_merge_list /tmp"
         with io.StringIO(conf) as file:
-            doc = yaml_loader.yaml.safe_load(file)
+            doc = yaml_loader.yaml.load(file)
             assert sorted(doc["key"]) == sorted(["one", "two", "three"])
 
 
@@ -212,7 +212,7 @@ def test_include_dir_merge_list_recursive(mock_walk):
         with io.StringIO(conf) as file:
             assert '.ignore' in mock_walk.return_value[0][1], \
                 "Expecting .ignore in here"
-            doc = yaml_loader.yaml.safe_load(file)
+            doc = yaml_loader.yaml.load(file)
             assert 'tmp2' in mock_walk.return_value[0][1]
             assert '.ignore' not in mock_walk.return_value[0][1]
             assert sorted(doc["key"]) == sorted(["one", "two",
@@ -232,7 +232,7 @@ def test_include_dir_merge_named(mock_walk):
     with patch_yaml_files(files):
         conf = "key: !include_dir_merge_named /tmp"
         with io.StringIO(conf) as file:
-            doc = yaml_loader.yaml.safe_load(file)
+            doc = yaml_loader.yaml.load(file)
             assert doc["key"] == {
                 "key1": "one",
                 "key2": "two",
@@ -258,7 +258,7 @@ def test_include_dir_merge_named_recursive(mock_walk):
         with io.StringIO(conf) as file:
             assert '.ignore' in mock_walk.return_value[0][1], \
                 "Expecting .ignore in here"
-            doc = yaml_loader.yaml.safe_load(file)
+            doc = yaml_loader.yaml.load(file)
             assert 'tmp2' in mock_walk.return_value[0][1]
             assert '.ignore' not in mock_walk.return_value[0][1]
             assert doc["key"] == {
